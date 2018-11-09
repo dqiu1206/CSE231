@@ -1,0 +1,114 @@
+/*******************************************************************************
+ * Copyright (C) 2016-2017 Dennis Cosgrove
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+package floodfill.studio;
+
+import static edu.wustl.cse231s.rice.habanero.Habanero.async;
+import static edu.wustl.cse231s.rice.habanero.Habanero.finish;
+
+import edu.rice.hj.api.SuspendableException;
+import edu.wustl.cse231s.NotYetImplementedException;
+import edu.wustl.cse231s.pixels.MutablePixels;
+import javafx.scene.paint.Color;
+
+/**
+ * @author David Qiu
+ * @author Dennis Cosgrove (http://www.cse.wustl.edu/~cosgroved/)
+ */
+public class FloodFiller {
+	/**
+	 * This is the only method that you will need to implement for this
+	 * assignment. This method should be recursive; that is, it should only set
+	 * the color of a single pixel. When called by the floodFill method, your
+	 * algorithm should change one connected group of pixels (of the same color)
+	 * to another color.
+	 * 
+	 * @param mutablePixels
+	 *            The set of pixels that you are supposed to manipulate. See the
+	 *            MutablePixels class for information about the methods that you
+	 *            have access to.
+	 * @param targetColor
+	 *            The color targeted for replacement. Remember that the flood
+	 *            fill algorithm changes one color to another. It should only
+	 *            change pixels of this target color.
+	 * @param replacementColor
+	 *            The new color to set pixels to. The targetColor parameter thus
+	 *            finds which pixels to target, and the replacement color
+	 *            describes how that color is replaced.
+	 * @param x
+	 *            The x-coordinate of the pixel to examine.
+	 * @param y
+	 *            The y-coordinate of the pixel to examine.
+	 */
+	@SuppressWarnings("restriction")
+	private static void floodFillKernel(MutablePixels mutablePixels, Color targetColor, Color replacementColor, int x, int y) {
+		
+		if(!mutablePixels.isInBounds(x, y)|| !mutablePixels.getColor(x, y).equals(targetColor)) {
+			return;
+		}
+		
+		mutablePixels.setColor(x, y, replacementColor);
+		
+			
+		
+		async(()->{
+			floodFillKernel(mutablePixels, targetColor, replacementColor, x+1,y);
+		});
+		async(()->{
+			floodFillKernel(mutablePixels, targetColor, replacementColor, x-1,y);
+		});
+		async(()->{
+			floodFillKernel(mutablePixels, targetColor, replacementColor, x,y+1);
+		});
+		async(()->{
+			floodFillKernel(mutablePixels, targetColor, replacementColor, x,y-1);
+		});
+			
+		
+		
+		
+		return;
+	}
+
+	/**
+	 * Starts your recursive algorithm by finding the color of the original
+	 * pixel and calling floodFillKernel on that pixel.
+	 * 
+	 * @param pixels
+	 *            The original pixels to manipulate for the flood fill.
+	 * @param replacementColor
+	 *            The new color to fill the area with.
+	 * @param x
+	 *            The x-coordinate of the flood fill starting point.
+	 * @param y
+	 *            The y-coordinate of the flood fill starting point.
+	 */
+	public static void floodFill(MutablePixels pixels, Color replacementColor, int x, int y) throws SuspendableException {
+		Color targetColor = pixels.getColor(x, y);
+		if (replacementColor.equals(targetColor)) {
+			// pass
+		} else {
+			finish(() -> {
+				floodFillKernel(pixels, targetColor, replacementColor, x, y);
+			});
+		}
+	}
+}

@@ -1,0 +1,48 @@
+/*******************************************************************************
+ * Copyright (C) 2016-2017 Dennis Cosgrove
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+package edu.wustl.cse231s.executors;
+
+import java.io.IOException;
+import java.util.stream.IntStream;
+
+import edu.wustl.cse231s.IntendedForStaticAccessOnlyError;
+import edu.wustl.cse231s.bioinformatics.Nucleobase;
+import edu.wustl.cse231s.bioinformatics.io.FastaUtils;
+
+/**
+ * @author Finn Voichick
+ * @author Dennis Cosgrove (http://www.cse.wustl.edu/~cosgroved/)
+ */
+public class NucleobaseCountTestUtils {
+	private NucleobaseCountTestUtils() {
+		throw new IntendedForStaticAccessOnlyError();
+	}
+
+	public static byte[] loadHomoSapiensMitochondrion() throws IOException {
+		return FastaUtils.read(NucleobaseCountTestUtils.class.getResourceAsStream("HomoSapiensMitochondrion.fasta"));
+	}
+
+	public static int truthAndBeautyCount(byte[] chromosome, Nucleobase nucleobase) {
+		return IntStream.range(0, chromosome.length).map(index -> chromosome[index]).reduce(0,
+				(a, b) -> nucleobase.toByte() == b ? a + 1 : a);
+	}
+}
